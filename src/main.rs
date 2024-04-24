@@ -1,21 +1,18 @@
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, http::header::ContentType};
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
-use lambda_http::{run, service_fn, Body, Error, Request, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use std::convert::Infallible;
 use std::io::Write;
 use std::path::PathBuf;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct RequestBody {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Request {
     pub input: String,
 }
 
-/// This is the main body for the function.
-/// Write your code inside it.
-/// There are some code example in the following URLs:
-/// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
-async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
+#[post("/message")]
+async fn message(data: web::Json<Request>) -> impl Responder {
     // Extract some useful information from the request
     let body = event.body();
     let s = std::str::from_utf8(body).expect("invalid utf-8 sequence");
@@ -59,7 +56,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             prompt: (&prompt).into(),
             parameters: &llm::InferenceParameters::default(),
             play_back_previous_tokens: false,
-            maximum_token_count: Some(10),
+            maximum_token_count: Some(30),
         },
         // OutputRequest
         &mut Default::default(),
@@ -76,38 +73,20 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
 
     match answer {
         Ok(_) => {
-            let resp = Response::builder()
-                .status(200)
-                .header("content-type", "text/plain")
-                .body((out).into())
-                .map_err(Box::new)?;
-            return Ok(resp);
+            return HttpResponse::Ok().content_type(ContentType::plaintext()).body(out);
         },
         Err(err) => {
-            let resp = Response::builder()
-                .status(200)
-                .header("content-type", "text/plain")
-                .body(("Error during inference: ".to_string() + &err.to_string() + "\n").into())
-                .map_err(Box::new)?;
-            return Ok(resp);
+            let res = &err.to_string();
+            return HttpResponse::Ok().content_type(ContentType::plaintext()).body(format!("Error during inference: {res}\n"));
         },
     }
     
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Error> {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::builder()
-                .with_default_directive(LevelFilter::INFO.into())
-                .from_env_lossy(),
-        )
-        // disable printing the name of the module in every log line.
-        .with_target(false)
-        // disabling time is handy because CloudWatch will add the ingestion time.
-        .without_time()
-        .init();
-
-    run(service_fn(function_handler)).await
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().service(message))
+        .bind(("0.0.0.0", 8080))?
+        .run()
+        .await
 }
