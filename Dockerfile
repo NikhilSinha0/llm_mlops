@@ -26,7 +26,7 @@ RUN mkdir /app/model
 COPY ./model /app/model
 
 # Copy the compiled binary from the builder stage into the lightweight container
-COPY --from=builder /app/target/release/ns380-transformer-lambda .
+COPY --from=builder /app/target/release/llm_mlops .
 
 # Command to run the application
-CMD ["./ns380-transformer-lambda"]
+CMD ["./llm_mlops"]

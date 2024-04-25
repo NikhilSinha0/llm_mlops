@@ -23,9 +23,17 @@ A simpler way to do this is to simply call the
 ```
 deploy/build.sh
 ```
-script instead, which will run these instructions for you.
+script instead, which will run these instructions for you. You need to pass a few options. Example usage could be
+```
+./deploy/build.sh -u <ECR_REPO> -n
+```
+which will build the container but not deploy it to ECR, or
+```
+./deploy/build.sh -u <ECR_REPO> -r <REGION>
+```
+which will build and deploy the container to ECR in a region other than us-west-2
 
-Then you can run the container locally to test using a command like
+Once you have a built container, you can run it locally to test using a command like
 ```
 docker run -it --rm -p 8080:8080 $ECR_URL:latest
 ```

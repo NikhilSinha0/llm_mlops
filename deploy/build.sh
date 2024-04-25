@@ -7,13 +7,25 @@ cd $parent_path/.. # Run this from the root of the llm_ops main directory
 trap "cd $current_path" EXIT # Make sure we go back to the original calling directory when we are done
 ECR_URL="None"
 REGION="us-west-2"
-while getopts u:a:f: flag
+NO_DEPLOY=false
+while getopts r:u:n flag
 do
     case "${flag}" in
-        u) ECR_URL=${OPTARG};;
         r) REGION=${OPTARG};;
+        u) ECR_URL=${OPTARG};;
+        n) NO_DEPLOY=true;;
+        \?) echo "Invalid option -$OPTARG" >&2
+        exit 1
     esac
 done
+if [ "$ECR_URL" == "None" ]; then
+    echo "Please specify an ECR Repo URL using -u"
+    exit 1
+fi
 docker build -t $ECR_URL:latest .
+if [ $NO_DEPLOY ]; then
+    echo "Not deploying as NO_DEPLOY was set to true"
+    exit 0
+fi
 aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin $ECR_URL
 docker push $ECR_URL:latest

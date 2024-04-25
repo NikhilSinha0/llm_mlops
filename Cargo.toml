@@ -1,5 +1,5 @@
 [package]
-name = "ns380-transformer-lambda"
+name = "llm_mlops"
 version = "0.1.0"
 edition = "2021"
 
@@ -17,7 +17,6 @@ edition = "2021"
 [dependencies]
 actix-web = "4.5.1"
 llm = { git = "https://github.com/rustformers/llm" , branch = "main" }
-openssl = { version = "0.10.35", features = ["vendored"] }
 rand = "0.8.5"
 serde = "1.0.196"
 serde_json = "1.0.113"
