@@ -8,11 +8,15 @@ trap "cd $current_path" EXIT # Make sure we go back to the original calling dire
 ECR_URL="None"
 REGION="us-west-2"
 NO_DEPLOY=false
-while getopts r:u:n flag
+PUBLIC=false
+SKIP_BUILD=false
+while getopts r:u:nsp flag
 do
     case "${flag}" in
         r) REGION=${OPTARG};;
         u) ECR_URL=${OPTARG};;
+        p) PUBLIC=true;;
+        s) SKIP_BUILD=true;;
         n) NO_DEPLOY=true;;
         \?) echo "Invalid option -$OPTARG" >&2
         exit 1
@@ -22,11 +26,17 @@ if [ "$ECR_URL" == "None" ]; then
     echo -e "Please specify an ECR Repo URL using -u"
     exit 1
 fi
-docker build -t $ECR_URL:latest .
+if ! $SKIP_BUILD; then
+    docker build -t $ECR_URL:latest .
+fi
 if $NO_DEPLOY; then
     echo -e "Not deploying as NO_DEPLOY was set to true"
     exit 0
 fi
-TMP=$(aws ecr get-login-password --region $REGION)
+if $PUBLIC; then
+    TMP=$(aws ecr-public get-login-password --region $REGION)
+else
+    TMP=$(aws ecr get-login-password --region $REGION)
+fi
 docker login --username AWS --password $TMP $ECR_URL
 docker push $ECR_URL:latest
