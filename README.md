@@ -1,3 +1,5 @@
+[![Rust CI](https://github.com/NikhilSinha0/llm_mlops/actions/workflows/rust.yml/badge.svg)](https://github.com/NikhilSinha0/llm_mlops/actions/workflows/rust.yml)
+
 # LLM Ops
 
 This is the final project for group 6 for IDS 721. The project involves taking an open source model from HuggingFace and creating a web service in Rust to serve inferences from the model. The webservice needs to be deployed on a Kubernetes cluster and set up with some monitoring and metrics. There also needs to be a CI/CD pipeline for this repository to automate the process of testing/building/deployment of the service.
