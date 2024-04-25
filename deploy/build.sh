@@ -19,13 +19,14 @@ do
     esac
 done
 if [ "$ECR_URL" == "None" ]; then
-    echo "Please specify an ECR Repo URL using -u"
+    echo -e "Please specify an ECR Repo URL using -u"
     exit 1
 fi
 docker build -t $ECR_URL:latest .
-if [ $NO_DEPLOY ]; then
-    echo "Not deploying as NO_DEPLOY was set to true"
+if $NO_DEPLOY; then
+    echo -e "Not deploying as NO_DEPLOY was set to true"
     exit 0
 fi
-aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin $ECR_URL
+TMP=$(aws ecr get-login-password --region $REGION)
+docker login --username AWS --password $TMP $ECR_URL
 docker push $ECR_URL:latest
