@@ -1,4 +1,4 @@
-use actix_web::{post, web, App, HttpResponse, HttpServer, Responder, http::header::ContentType};
+use actix_web::{http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::io::Write;
@@ -55,15 +55,18 @@ async fn infer(prompt: String) -> Result<String, Box<dyn std::error::Error>> {
 
 #[post("/message")]
 async fn message(data: web::Json<Request>) -> impl Responder {
-
     let prompt = data.input.clone();
     match infer(prompt).await {
         Ok(result) => {
-            return HttpResponse::Ok().content_type(ContentType::plaintext()).body(result);
+            return HttpResponse::Ok()
+                .content_type(ContentType::plaintext())
+                .body(result);
         }
         Err(err) => {
             let res = &err.to_string();
-            return HttpResponse::Ok().content_type(ContentType::plaintext()).body(format!("Error during inference: {res}\n"));
+            return HttpResponse::Ok()
+                .content_type(ContentType::plaintext())
+                .body(format!("Error during inference: {res}\n"));
         }
     }
 }
