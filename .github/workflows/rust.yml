@@ -1,0 +1,30 @@
+name: Rust CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Test, Lint, and Format
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Rust and dependencies
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Test
+      run: cargo test
+
+    - name: Lint
+      run: cargo clippy -- -D warnings
+
+    - name: Format
+      run: cargo fmt -- --check
+
+    - name: Commit changes (if needed)
+      run: |
+        git diff --exit-code || { git config --global user.email "actions@github.com" && git config --global user.name "GitHub Actions" && git commit -am "Apply formatting fixes" && git push; }
