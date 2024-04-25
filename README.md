@@ -4,7 +4,7 @@
 
 This is the final project for group 6 for IDS 721. The project involves taking an open source model from HuggingFace and creating a web service in Rust to serve inferences from the model. The webservice needs to be deployed on a Kubernetes cluster and set up with some monitoring and metrics. There also needs to be a CI/CD pipeline for this repository to automate the process of testing/building/deployment of the service.
 
-## Build Process
+## Build and Dockerization Process
 
 The build process for this project is requires some assets. First you need to download a model from huggingface, and keep it in a known location in the repository.
 
@@ -45,6 +45,55 @@ and hit the endpoint with a command like
 curl -X POST -H "Content-Type: application/json" --data '{"input": "tigers are cool because"}' http://localhost:8080/message
 ```
 run from a new terminal (since the original terminal will be running the service).
+
+## Kubernetes - Container Orchestration
+
+Amazon Elastic Kubernetes Service (Amazon EKS) is a managed service that makes it easy for you to run Kubernetes on AWS without needing to install and operate your own Kubernetes clusters.
+
+### Installation
+In order to use the command line interface and interact with EKS, you need to install two things: kubectl and eksctl. Run the following commands (assuming you have homebrew) to install.
+* kubectl
+    * `brew install kubectl`
+* eksctl
+    * `brew tap weaveworks/tap`
+    * `brew install weaveworks/tap/eksctl`
+
+### Cluster and Namespace Creation
+First, we need to create a kubernetes cluster and a namespace
+
+To create a cluster, run: 
+
+`eksctl create cluster 'sample-cluster2' --zones us-east-1a,us-east-1b,us-east-1c`
+
+To create a namespace, run: 
+
+`kubectl create namespace {name of namespace}`
+
+### Deploy Docker Image to Cluster
+
+To deploy the docker image to cluster, we need to write two yaml files and run two commands.
+
+The deployment.yaml file pulls a container image from a public repository and deploys three replicas (known as pods).
+
+The service.yaml file allows you to access all replicas through a single IP address or name. We are able to add load balancing here.
+
+Once the .yaml files are written, run the following two lines of code:
+
+`kubectl apply -f {name of deployment yaml file}.yaml`
+
+`kubectl apply -f {name of service yaml file}.yaml`
+
+
+### QC Deployment
+
+Run the following commands to confirm there are actively running pods
+
+`kubectl get all -n {name of namespace}`
+
+Details of the deployment can be found by running: 
+
+`kubectl -n {name of app} describe service {name of service}`
+
 
 
 ## Usage
