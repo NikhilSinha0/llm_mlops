@@ -23,7 +23,7 @@ jobs:
       run: cargo clippy -- -D warnings
 
     - name: Format
-      run: cargo fmt -- --check
+      run: cargo fmt
 
     - name: Commit changes (if needed)
       run: |
