@@ -94,8 +94,6 @@ Details of the deployment can be found by running:
 
 `kubectl -n {name of app} describe service {name of service}`
 
-
-
 ## Usage
 
 This webservice is intended to be used with cURL. A command for usage should look like
@@ -105,3 +103,24 @@ curl -H "Content-Type: application/json" --data '{"input": "tigers are cool beca
 ```
 
 and should return an answer from the model.
+
+
+## Screenshots
+
+### Create Public ECR
+
+![pushtoecr](photos/pushtoecr.png)
+
+![publicecr1](photos/publicecr1.png)
+
+![publicecr](photos/publicecr.png)
+
+### EKS Cluster Creation
+
+![createcluster](photos/createcluster.png)
+
+![podsready](photos/podsready.png)
+
+![eks](photos/eks.png)
+
+![clusterdetails](photos/clusterdetails.png)
