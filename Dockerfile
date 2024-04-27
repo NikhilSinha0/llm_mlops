@@ -30,6 +30,10 @@ RUN apt-get update && apt-get install -y libfontconfig1 wget python3 python3-pip
 RUN mkdir /app/model
 COPY ./model /app/model
 
+# Make sure the model is available for usage
+RUN mkdir /app/model
+COPY ./model /app/model
+
 # Copy the compiled binary from the builder stage into the lightweight container
 COPY --from=builder /app/target/release/llm_mlops .
 
