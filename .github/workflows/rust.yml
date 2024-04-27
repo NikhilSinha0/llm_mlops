@@ -33,8 +33,11 @@ jobs:
       - name: Set libtorch env
         run: echo "LIBTORCH_USE_PYTORCH=1" >> $GITHUB_ENV
       
+      - name: pwd
+        run: pwd
+
       - name: Find
-        run: find . -name libtorch_cpu.so
+        run: find /opt/hostedtoolcache/Python/3.11.9 -name libtorch_cpu.so
 
       - name: Set LD lib env
         run: echo "LD_LIBRARY_PATH=/usr/local/lib/python3.11/dist-packages/torch/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
