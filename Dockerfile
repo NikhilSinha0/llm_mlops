@@ -20,7 +20,7 @@ FROM debian:latest
 # Set the working directory
 WORKDIR /app
 
-# Make sure openSSL is set up correctly in the container
+# Make sure torch is set up correctly in the container
 RUN apt-get update && apt-get install -y libfontconfig1 wget python3 python3-pip && \
   pip3 install torch==2.1.0+cpu --index-url https://download.pytorch.org/whl/cpu --break-system-packages && \
   apt-get clean && \

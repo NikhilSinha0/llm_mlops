@@ -22,6 +22,15 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Install torch
+        run: apt-get update && apt-get install -y libfontconfig1 wget python3 python3-pip && \
+          pip3 install torch==2.1.0+cpu --index-url https://download.pytorch.org/whl/cpu --break-system-packages && \
+          apt-get clean && \
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Set env
+        run: echo "LIBTORCH_USE_PYTORCH=1" >> $GITHUB_ENV
+
       - name: Test
         run: cargo test
 
@@ -42,7 +51,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run build.sh
-        run: deploy/build.sh
+        run: deploy/build.sh -u public.ecr.aws/c3q7e5h6/llm_mlops_ids721 -p -r us-east-1
 
 
 
