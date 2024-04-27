@@ -33,9 +33,6 @@ jobs:
       - name: Set libtorch env
         run: echo "LIBTORCH_USE_PYTORCH=1" >> $GITHUB_ENV
 
-      - name: Set LD lib env
-        run: echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.11.9/x64/lib/python3.11/site-packages/torch/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-
       - name: Test
         run: cargo test
 
@@ -55,9 +52,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run build.sh
-        run: deploy/build.sh -u public.ecr.aws/c3q7e5h6/llm_mlops_ids721 -p -r us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
+      - name: Create ECR Repository
+        id: create_ecr_repo
+        run: |
+          aws ecr create-repository --repository-name my-ecr-repo-rust
+          ECR_URL=$(aws ecr describe-repositories --repository-names my-ecr-repo-rust --query 'repositories[0].repositoryUri' --output text)
+          echo "::set-env name=ECR_URL::$ECR_URL"
 
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}
 
+      - name: Build and Tag Docker Image
+        run: |
+          ./build.sh -u $ECR_URL
 
+      - name: Push Docker Image to Amazon ECR
+        run: docker push ${{ env.ECR_URL }}:latest
