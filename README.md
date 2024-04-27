@@ -99,10 +99,15 @@ Details of the deployment can be found by running:
 This webservice is intended to be used with cURL. A command for usage should look like
 
 ```
-curl -H "Content-Type: application/json" --data '{"input": "tigers are cool because"}' <URL>
+curl -X POST -H "Content-Type: application/json" --data '{"context": "mary is my mother", "query": "who is mary"}' http://a32c9ee0e4f5e4632beea263c7bce134-2036735149.us-west-2.elb.amazonaws.com/answer_question
 ```
 
-and should return an answer from the model.
+and should return an answer from the model like
+
+```
+my mother
+```
+.
 
 
 ## Screenshots
