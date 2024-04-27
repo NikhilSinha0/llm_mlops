@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eks-sample-linux-deployment
-  namespace: eks-sample-app
+  name: llmops-deployment
+  namespace: llmops
   labels:
-    app: eks-sample-linux-app
+    app: llmops-app
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: eks-sample-linux-app
+      app: llmops-app
   template:
     metadata:
       labels:
-        app: eks-sample-linux-app
+        app: llmops-app
     spec:
       affinity:
         nodeAffinity:
@@ -26,8 +26,8 @@ spec:
                 - amd64
                 - arm64
       containers:
-      - name: nginx
-        image: public.ecr.aws/c3q7e5h6/llm_mlops_ids271
+      - name: application
+        image: public.ecr.aws/c3q7e5h6/llm_mlops_ids721
         ports:
         - name: app-port
           containerPort: 8080

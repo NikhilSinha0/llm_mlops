@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# This script gets the model defined at the wget link and puts it at llm_mlops/model/pythia.bin
+# This script gets the resources defined at the wget links and puts them in the llm_mlops/model directory
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-wget https://huggingface.co/rustformers/pythia-ggml/resolve/main/pythia-1.4b-q4_0-ggjt.bin
-mv pythia-1.4b-q4_0-ggjt.bin $parent_path/pythia.bin
+wget https://huggingface.co/distilbert-base-cased-distilled-squad/resolve/main/rust_model.ot
+wget https://huggingface.co/distilbert-base-cased-distilled-squad/resolve/main/config.json
+wget https://huggingface.co/bert-large-cased/resolve/main/vocab.txt
+mv rust_model.ot $parent_path/rust_model.ot
+mv config.json $parent_path/config.json
+mv vocab.txt $parent_path/vocab.txt

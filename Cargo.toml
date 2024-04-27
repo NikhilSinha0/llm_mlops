@@ -16,10 +16,10 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.5.1"
-llm = { git = "https://github.com/rustformers/llm" , branch = "main" }
 rand = "0.8.5"
 serde = "1.0.196"
 serde_json = "1.0.113"
+rust-bert = "0.22.0"
 tokio = { version = "1", features = ["macros"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }

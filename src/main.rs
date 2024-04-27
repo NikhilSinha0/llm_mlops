@@ -1,79 +1,69 @@
 use actix_web::{http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
-use std::convert::Infallible;
-use std::io::Write;
 use std::path::PathBuf;
+use rust_bert::pipelines::question_answering::{QuestionAnsweringModel, QuestionAnsweringConfig, QaInput};
+use rust_bert::pipelines::common::ModelResource;
+use rust_bert::resources::LocalResource;
+use std::sync::Mutex;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Request {
-    pub input: String,
+    pub context: String,
+    pub query: String,
 }
 
-async fn infer(prompt: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Using https://github.com/AIAnytime/LLM-Inference-API-in-Rust/blob/main/language_model_server/src/main.rs as a source example for how to set up
-    let tokenizer_source = llm::TokenizerSource::Embedded;
-    let model_architecture = llm::ModelArchitecture::GptNeoX;
-    let model_path = PathBuf::from("/app/model/pythia.bin");
-    let model = llm::load_dynamic(
-        Some(model_architecture),
-        &model_path,
-        tokenizer_source,
-        Default::default(),
-        llm::load_progress_callback_stdout,
-    )?;
+#[post("/answer_question")]
+async fn answer_question(model_ctx: web::Data<Mutex<QuestionAnsweringModel>>, data: web::Json<Request>) -> impl Responder {
+                                                        
+    let question = data.query.clone();
+    let context = data.context.clone();
+    let model = model_ctx.lock().unwrap();
 
-    let mut session = model.start_session(Default::default());
-    let mut out = String::new();
+    let result = model.predict(&[QaInput { question, context }], 1, 1);
 
-    let answer = session.infer::<Infallible>(
-        model.as_ref(),
-        &mut rand::thread_rng(),
-        &llm::InferenceRequest {
-            prompt: (&prompt).into(),
-            parameters: &llm::InferenceParameters::default(),
-            play_back_previous_tokens: false,
-            maximum_token_count: Some(64),
-        },
-        // OutputRequest
-        &mut Default::default(),
-        |r| match r {
-            llm::InferenceResponse::PromptToken(t) | llm::InferenceResponse::InferredToken(t) => {
-                print!("{t}");
-                std::io::stdout().flush().unwrap();
-                out.push_str(&t);
-                Ok(llm::InferenceFeedback::Continue)
-            }
-            _ => Ok(llm::InferenceFeedback::Continue),
-        },
-    );
+    // Since we set topk to one, the inner vec should only have one item. Since the batch size is one, the outer vec should only have one item.
+    let answer = &result[0][0];
 
-    match answer {
-        Ok(_) => Ok(out),
-        Err(err) => Err(Box::new(err)),
-    }
-}
-
-#[post("/message")]
-async fn message(data: web::Json<Request>) -> impl Responder {
-    let prompt = data.input.clone();
-    match infer(prompt).await {
-        Ok(result) => {
-            return HttpResponse::Ok()
-                .content_type(ContentType::plaintext())
-                .body(result);
-        }
-        Err(err) => {
-            let res = &err.to_string();
-            return HttpResponse::Ok()
-                .content_type(ContentType::plaintext())
-                .body(format!("Error during inference: {res}\n"));
-        }
-    }
+    HttpResponse::Ok().content_type(ContentType::plaintext()).body(answer.answer.clone())
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(message))
+    let model_path = Box::new(LocalResource {
+        local_path: PathBuf::from("/app/model/rust_model.ot"),
+    });
+
+    let config_path = Box::new(LocalResource {
+        local_path: PathBuf::from("/app/model/config.json"),
+    });
+
+    let vocab_path = Box::new(LocalResource {
+        local_path: PathBuf::from("/app/model/vocab.txt"),
+    });
+
+    let qa_model = QuestionAnsweringModel::new(QuestionAnsweringConfig {
+        model_resource: ModelResource::Torch(model_path),
+        config_resource: config_path,
+        vocab_resource: vocab_path,
+        ..Default::default()
+    });
+    
+    let model: QuestionAnsweringModel;
+
+    match qa_model {
+        Ok(m) => {
+            model = m;
+            println!("Successfully loaded model");
+        },
+        Err(e) => {
+            let err_str = e.to_string();
+            return Err(std::io::Error::new(std::io::ErrorKind::Other, format!("Model initialization failed: {err_str}")));
+        }
+    }
+
+    let model_wrapper = web::Data::new(Mutex::new(model));
+
+    HttpServer::new(move || App::new().service(answer_question).app_data(model_wrapper.clone()))
         .bind(("0.0.0.0", 8080))?
         .run()
         .await
