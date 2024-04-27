@@ -75,7 +75,7 @@ To deploy the docker image to cluster, we need to write two yaml files and run t
 
 The deployment.yaml file pulls a container image from a public repository and deploys three replicas (known as pods).
 
-The service.yaml file allows you to access all replicas through a single IP address or name. We are able to add load balancing here.
+The service.yaml file allows you to access all replicas through a single IP address or name. We are able to add load balancing here. This performs monitoring and metrics
 
 Once the .yaml files are written, run the following two lines of code:
 
@@ -129,3 +129,16 @@ my mother
 ![eks](photos/eks.png)
 
 ![clusterdetails](photos/clusterdetails.png)
+
+### Monitoring and Metrics
+
+![LoadBalancing](photos/LoadBalancing.png)
+
+![Monitoring](photos/Monitoring.png)
+
+![NetworkMapping](photos/NetworkMapping.png)
+
+### Working Rust Web Service
+
+![webservice](photos/workingwebservice.png)
+
