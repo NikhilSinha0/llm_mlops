@@ -59,19 +59,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Create ECR Repository
-        id: create_ecr_repo
-        run: |
-          aws ecr create-repository --repository-name my-ecr-repo-rust
-          ECR_URL=$(aws ecr describe-repositories --repository-names my-ecr-repo-rust --query 'repositories[0].repositoryUri' --output text)
-          echo "::set-env name=ECR_URL::$ECR_URL"
-
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}
-
-      - name: Build and Tag Docker Image
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Build, tag, and push Docker image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: rust-app
+          IMAGE_TAG: latest
         run: |
-          ./build.sh -u $ECR_URL
-
-      - name: Push Docker Image to Amazon ECR
-        run: docker push ${{ env.ECR_URL }}:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
