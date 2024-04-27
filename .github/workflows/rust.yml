@@ -22,6 +22,20 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install torch
+        run: pip3 install torch==2.1.0+cpu --index-url https://download.pytorch.org/whl/cpu --break-system-packages
+
+      - name: Set env
+        run: echo "LIBTORCH_USE_PYTORCH=1" >> $GITHUB_ENV
+
+      - name: Test
+        run: cargo test
+
       - name: Lint
         run: cargo clippy -- -D warnings
 
