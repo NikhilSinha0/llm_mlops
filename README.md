@@ -169,3 +169,6 @@ https://youtu.be/P7U5G8eKj98
 
 ![webservice](photos/workingwebservice.png)
 
+### Continuous Deployment Image in ECR
+
+<img width="1414" alt="Screenshot 2024-04-27 at 11 52 21 PM" src="https://github.com/NikhilSinha0/llm_mlops/assets/112578194/e1d530d2-66ba-4739-9afd-9eea244a99cd">
