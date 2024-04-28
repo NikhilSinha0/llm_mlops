@@ -107,8 +107,35 @@ and should return an answer from the model like
 ```
 my mother
 ```
-.
 
+## CI/CD
+
+This repository includes CI/CD pipelines using GitHub Actions to automate testing, linting, formatting, building, and deployment processes for your Rust application.
+
+### Continuous Integration (CI)
+
+The CI pipeline runs on every push to the main branch and pull requests targeting the main branch. It ensures code quality and correctness by performing tests, linting, and formatting.
+
+### Continuous Deployment (CD)
+
+The CD pipeline deploys your application on every push to the main branch. It requires successful completion of the CI pipeline and deploys your application to AWS Elastic Container Registry (ECR).
+
+### Setup
+
+To use the CD pipeline, you'll need to:
+
+1. Set up AWS access and secret keys as repository secrets (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
+2. Ensure the IAM user associated with the provided keys has permissions to:
+   - Log in to AWS.
+   - Deploy images to Amazon ECR.
+
+For more details on configuring permissions, refer to AWS IAM documentation.
+
+For detailed configuration, see [main.yaml](main.yaml) in this repository.
+
+
+## Demo Video
+https://youtu.be/P7U5G8eKj98 
 
 ## Screenshots
 
